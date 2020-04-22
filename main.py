@@ -55,8 +55,9 @@ cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_R_101_C4_3x.yaml"))
 cfg.DATASETS.TRAIN = (dataset_name)
 cfg.DATASETS.TEST = () # No test dataset in use right now
-cfg.DATALOADER.NUM_WORKERS = 0 # TODO: CHANGE THIS
+cfg.DATALOADER.NUM_WORKERS = 2 # TODO: Verify if it needs to be changed
 cfg.MODEL_WEIGHTS = model_zoo.get_checkpoint_url("COCO-Detection/faster_rcnn_R_101_C4_3x.yaml")
+cfg.SOLVER.IMS_PER_BATCH = 2 # TODO: Verify if it needs to be changed
 cfg.SOLVER.BASE_LR = 0.02 # TODO: CHANGE THIS
 cfg.SOLVER.MAX_ITER = (300)  # 300 iterations seems good enough, but you can certainly train longer. TODO: CHANGE THIS
 cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = (128)  # faster, and good enough for this toy dataset. TODO: CHANGE THIS
