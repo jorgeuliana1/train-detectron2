@@ -1,0 +1,16 @@
+{
+    "TRAIN" : {
+        "base_directory" : "",
+        "annotations_csv" : "",
+        "classes_json" : "",
+        "width" : 0,
+        "height" : 0
+    },
+    "TEST" : {
+        "base_directory" : "",
+        "annotations_csv" : "",
+        "classes_json" : "",
+        "width" : 0,
+        "height" : 0
+    }
+}
