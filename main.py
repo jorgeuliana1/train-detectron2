@@ -1,4 +1,4 @@
-import json, os, random, time, cv2 # Default libs
+import json, os, sys, random, time, cv2 # Default libs
 
 # Detectron2 modules
 from detectron2.structures import BoxMode
@@ -18,8 +18,12 @@ from dataset import Dataset
 # DefaultTrainer is the model trainer we are going to use.
 # model_zoo is a really useful tool that allow us to quickly export cfg and ckpt files from the web.
 
+# Getting the path to configuration files (from command-line):
+args = sys.argv
+dataset_info_file_path = args[1] # This file will allow us to configure the dataset
+train_info_file_path = args[2] # This file will allow us to configure the train
+
 # Defining a few constants:
-dataset_info_file_path = "dataset_info.json" # This file will allow us to configure the dataset
 dataset_name = "m" # If you change this name errors may occur.
 # TODO: Find out why the only dataset name accepted is "m"
 
@@ -50,20 +54,22 @@ for d in random.sample(dataset_dicts, 3):
     cv2.imwrite("myimage.jpg", vis.get_image()[:, :, ::-1])
 """
 
+# Opening the train configuration file:
+with open(train_info_file_path, "r") as f:
+    train_settings = json.load(f)
+
 # Setting up the CFG:
 cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_R_101_C4_3x.yaml"))
 cfg.DATASETS.TRAIN = (dataset_name)
 cfg.DATASETS.TEST = () # No test dataset in use right now
-cfg.DATALOADER.NUM_WORKERS = 2 # TODO: Verify if it needs to be changed
+cfg.DATALOADER.NUM_WORKERS = train_settings["NUM_WORKERS"]
 cfg.MODEL_WEIGHTS = model_zoo.get_checkpoint_url("COCO-Detection/faster_rcnn_R_101_C4_3x.yaml")
-cfg.SOLVER.IMS_PER_BATCH = 2 # TODO: Verify if it needs to be changed
-cfg.SOLVER.BASE_LR = 0.02 # TODO: CHANGE THIS
-cfg.SOLVER.MAX_ITER = (300)  # 300 iterations seems good enough, but you can certainly train longer. TODO: CHANGE THIS
-cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = (128)  # faster, and good enough for this toy dataset. TODO: CHANGE THIS
-cfg.MODEL.ROI_HEADS.NUM_CLASSES = len(my_dataset.thing_classes)  # Number of classes is variable. TODO: CHANGE THIS
-
-# NOTE: Not every CFG setting is the most appropriate, we may fix this in a near future.
+cfg.SOLVER.IMS_PER_BATCH = train_settings["IMS_PER_BATCH"]
+cfg.SOLVER.BASE_LR = train_settings["BASE_LR"]
+cfg.SOLVER.MAX_ITER = (train_settings["MAX_ITER"])
+cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = (train_settings["BATCH_SIZE_PER_IMAGE"])
+cfg.MODEL.ROI_HEADS.NUM_CLASSES = len(my_dataset.thing_classes)  # Number of classes is variable.
 
 # Training our neural newtwork:
 os.makedirs(cfg.OUTPUT_DIR, exist_ok=True) # The output will be saved under "./output/"
