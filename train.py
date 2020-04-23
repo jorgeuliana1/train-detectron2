@@ -1,4 +1,6 @@
-import json, os, sys, random, time, cv2 # Default libs
+# Default libs
+import json, os, sys, random, time, cv2
+from datetime import datetime
 
 # Detectron2 modules
 from detectron2.structures import BoxMode
@@ -58,6 +60,14 @@ for d in random.sample(dataset_dicts, 3):
 with open(train_info_file_path, "r") as f:
     train_settings = json.load(f)
 
+# Defining the output directory:
+default_output_directory = "./output" # Every output will be under './output'.
+user_set_output_directory = train_settings["OUTPUT_DIR"]
+train_output_directory = os.path.join(default_output_directory, user_set_output_directory)
+
+# Setting the CFG file output path:
+cfg_file_output = os.path.join(train_output_directory, "cfg.yaml")
+
 # Setting up the CFG:
 cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_R_101_C4_3x.yaml"))
@@ -70,9 +80,13 @@ cfg.SOLVER.BASE_LR = train_settings["BASE_LR"]
 cfg.SOLVER.MAX_ITER = (train_settings["MAX_ITER"])
 cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = (train_settings["BATCH_SIZE_PER_IMAGE"])
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = len(my_dataset.thing_classes)  # Number of classes is variable.
+cfg.OUTPUT_DIR = train_output_directory # No risk to overwrite older trains.
+
+# Setting up the output directory:
+os.makedirs(cfg.OUTPUT_DIR, exist_ok=True) # Creating the output directory
+with open(cfg_file_output, "w") as f: f.write(str(cfg)) # Saving the CFG file (may be useful in the future)
 
 # Training our neural newtwork:
-os.makedirs(cfg.OUTPUT_DIR, exist_ok=True) # The output will be saved under "./output/"
 trainer = DefaultTrainer(cfg)
 trainer.resume_or_load(resume=False)
 trainer.train()
