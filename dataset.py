@@ -4,7 +4,7 @@ Detectron2 uses Coco-formated datasets, this file contains everything that
 allow us to outperform this difference.
 """
 
-import json
+import json, os
 from detectron2.structures import BoxMode
 
 class Dataset:
@@ -34,20 +34,6 @@ class Dataset:
     
     def _set_coco_dicts(self):
 
-        def get_image_dir(base_dir, relative_dir):
-
-            # This function safely gets the image absolute path
-
-            # Input treatment:
-            if base_dir[-1] == "/":
-                bas = base_dir[:-1]
-            else: bas = base_dir
-            if relative_dir[0] == "/":
-                rel = relative_dir[:-1]
-            else: rel = relative_dir
-
-            return "{}/{}".format(bas, rel)
-
         # This function sets a coco-format dictionary.
 
         categories_id = self.categories_dict
@@ -63,7 +49,7 @@ class Dataset:
 
             # Getting the CSV data:
             info = line.split(",")
-            file_name = get_image_dir(self.base_dir, info[0])
+            file_name = os.path.join(self.base_dir, info[0])
             x0, y0 = int(info[1]), int(info[2])
             x1, y1 = int(info[3]), int(info[4])
             category = info[5]
@@ -114,3 +100,15 @@ class Dataset:
         # Returns the already formated data
 
         return self.images
+
+    def get_images_paths(self):
+
+        # Returns a list containing the path to every image in the dataset.
+
+        paths = [] # `paths` will contain the image paths
+        
+        # Looking into every image dict:
+        for image in self.images:
+            paths.append(image["file_name"]) # Getting the absolute path in every image
+
+        return paths

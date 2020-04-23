@@ -1,0 +1,6 @@
+{
+    "CFG_PATH" : "",
+    "WEIGHTS_PATH" : "",
+    "SCORE_THRESH_TEST" : 0.5,
+    "OUTPUT_FOLDER" : "my_inference"
+}
