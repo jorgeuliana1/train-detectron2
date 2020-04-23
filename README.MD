@@ -9,6 +9,7 @@ I created it to use in my paper, but feel free to use it too.
 ## USAGE:
 
 For training: `python3 train.py dataset_info.json train_info.json`
+For testing: `python3 test.py dataset_info.json test_info.json`
 
 Where `dataset_info.json` may look like:
 ```json
