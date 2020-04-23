@@ -51,6 +51,6 @@ image_path(relative to base_directory),x0,y0,x1,y1,category
     "CATEGORY_03" : 3
 }
 ```
-where the `"__background"` tag is optional.
+where the `"__background__"` tag is optional.
 
 The repository provides models for `train_info.json` and `dataset_info.json`.
