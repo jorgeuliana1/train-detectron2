@@ -80,7 +80,7 @@ cfg.SOLVER.BASE_LR = train_settings["BASE_LR"]
 cfg.SOLVER.MAX_ITER = (train_settings["MAX_ITER"])
 cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = (train_settings["BATCH_SIZE_PER_IMAGE"])
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = len(my_dataset.thing_classes)  # Number of classes is variable.
-cfg.OUTPUT_DIR = train_output_directory # No risk to overwrite older trains.
+cfg.OUTPUT_DIR = train_output_directory # User set output directory (under ./output/)
 
 # Setting up the output directory:
 os.makedirs(cfg.OUTPUT_DIR, exist_ok=True) # Creating the output directory
