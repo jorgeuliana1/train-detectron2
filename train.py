@@ -71,10 +71,10 @@ cfg_file_output = os.path.join(train_output_directory, "cfg.yaml")
 # Setting up the CFG:
 cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_R_101_C4_3x.yaml"))
-cfg.DATASETS.TRAIN = (dataset_name)
+cfg.DATASETS.TRAIN = (dataset_name, )
 cfg.DATASETS.TEST = () # No test dataset in use right now
 cfg.DATALOADER.NUM_WORKERS = train_settings["NUM_WORKERS"]
-cfg.MODEL_WEIGHTS = model_zoo.get_checkpoint_url("COCO-Detection/faster_rcnn_R_101_C4_3x.yaml")
+cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-Detection/faster_rcnn_R_101_C4_3x.yaml")
 cfg.SOLVER.IMS_PER_BATCH = train_settings["IMS_PER_BATCH"]
 cfg.SOLVER.BASE_LR = train_settings["BASE_LR"]
 cfg.SOLVER.MAX_ITER = (train_settings["MAX_ITER"])
@@ -84,7 +84,7 @@ cfg.OUTPUT_DIR = train_output_directory # User set output directory (under ./out
 
 # Setting up the output directory:
 os.makedirs(cfg.OUTPUT_DIR, exist_ok=True) # Creating the output directory
-with open(cfg_file_output, "w") as f: f.write(str(cfg)) # Saving the CFG file (may be useful in the future)
+with open(cfg_file_output, "w") as f: f.write(cfg.dump()) # Saving the CFG file (may be useful in the future)
 
 # Training our neural newtwork:
 trainer = DefaultTrainer(cfg)

@@ -1,5 +1,5 @@
 # Default libs
-import json, os, sys, random, time, cv2
+import json, yaml, os, sys, random, time, cv2
 from datetime import datetime
 
 # Detectron2 modules
@@ -7,6 +7,7 @@ from detectron2.config import get_cfg
 from detectron2.data import DatasetCatalog, MetadataCatalog
 from detectron2.utils.visualizer import Visualizer
 from detectron2.engine import DefaultPredictor
+from detectron2 import model_zoo
 
 # Our modules:
 from dataset import Dataset
@@ -53,6 +54,8 @@ os.makedirs(output_folder_path, exist_ok=True) # Creating the output folder, if 
 cfg_output_path = os.path.join(output_folder_path, "cfg.yaml") # Defining the output file path.
 with open(cfg_output_path, "w") as f: f.write(str(cfg)) # Saving the cfg into the file.
 
+os.makedirs(os.path.join(output_folder_path, "images"), exist_ok=True) # Creating the images folder, if it doesn't exist.
+
 # Predicting:
 predictor = DefaultPredictor(cfg)
 for image_path in images_paths: # Predicting for every image.
@@ -61,8 +64,9 @@ for image_path in images_paths: # Predicting for every image.
 
     # Getting prediction image path
     image_file_name = image_path.split("/")[-1] # We are interested at the last element of the path.
-    output_path = os.path.join(output_folder_path, "images", output_path)
-    
+    output_path = os.path.join(output_folder_path, "images", image_file_name)
+    print("infering {}".format(output_path))
+
     # Saving the prediction image:
     visualizer = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.0)
     vis = visualizer.draw_instance_predictions(outputs["instances"].to("cpu"))
