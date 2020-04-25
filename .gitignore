@@ -4,4 +4,5 @@ test_info.json
 *.zip
 output
 infer_output
+vis_output
 __pycache__
