@@ -1,6 +1,8 @@
 # Default libs
 import json, yaml, os, sys, random, time, cv2
-from datetime import datetime
+
+# The progress bar is used in the last loop (You can modify it if you want to remove the dependency)
+from progressbar import ProgressBar
 
 # Detectron2 modules
 from detectron2.config import get_cfg
@@ -21,6 +23,7 @@ test_info_path = args[2]
 dataset_name = "t" # Arbitrary name of the dataset.
 dataset = Dataset(dataset_info_path, "TEST")
 images_paths = dataset.get_images_paths()
+images = dataset.get()
 # `images_paths` is a list containing the path to every annotated image in the dataset.
 
 # Defining our `get_dicts` function:
@@ -58,16 +61,52 @@ os.makedirs(os.path.join(output_folder_path, "images"), exist_ok=True) # Creatin
 
 # Predicting:
 predictor = DefaultPredictor(cfg)
-for image_path in images_paths: # Predicting for every image.
+images_predictions = [] # This list will be used to create a JSON file at the end of the predictions.
+pbar = ProgressBar()
+for image in pbar(images): # Predicting for every image (Using a progress bar).
+    image_path = image["file_name"]
     img = cv2.imread(image_path) # Loading the image with opencv.
     outputs = predictor(img) # Predicting image annotations.
 
     # Getting prediction image path
     image_file_name = image_path.split("/")[-1] # We are interested at the last element of the path.
     output_path = os.path.join(output_folder_path, "images", image_file_name)
-    print("infering {}".format(output_path))
 
+    # Getting the prediction info:
+    prediction_data = outputs["instances"] # That's an Instance object containing data about the prediction.
+    prediction_bboxes = prediction_data.pred_boxes.tensor # Converting from Box object to torch.tensor
+    prediction_classes = prediction_data.pred_classes # That's already a torch.tensor
+
+    # Casting our data to default python structures:
+    prediction_bboxes = prediction_bboxes.tolist()
+    prediction_classes = prediction_classes.tolist()
+
+    # Creating predicted data dictionaries:
+    predictions_dicts = [
+            { "category_id" : category, "bbox" : bbox }
+            for category, bbox in zip(prediction_classes, prediction_bboxes)
+            ]
+
+    # Creating annotated data dictionaries:
+    annotated_dicts = [ 
+            { "category_id" : annotation["category_id"], "bbox" : annotation["bbox"] }
+            for annotation in image["annotations"]
+            ]
+
+    # Creating an image dict:
+    image_dict = {
+            "image_name" : image_file_name,
+            "predictions" : predictions_dicts,
+            "annotations" : annotated_dicts
+            }
+    images_predictions.append(image_dict)
+    
     # Saving the prediction image:
-    visualizer = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.0)
-    vis = visualizer.draw_instance_predictions(outputs["instances"].to("cpu"))
-    cv2.imwrite(output_path, vis.get_image()[:, :, ::-1])
+    # visualizer = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.0)
+    # vis = visualizer.draw_instance_predictions(outputs["instances"].to("cpu"))
+    # cv2.imwrite(output_path, vis.get_image()[:, :, ::-1])
+
+# Saving the dicts to a JSON file:
+json_path = os.path.join(output_folder_path, "predictions.json")
+with open(json_path, "w") as json_file:
+    json.dump(images_predictions, json_file, indent=2)
