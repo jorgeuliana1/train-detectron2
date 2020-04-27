@@ -8,6 +8,7 @@ from progressbar import ProgressBar
 from detectron2.config import get_cfg
 from detectron2.data import DatasetCatalog, MetadataCatalog
 from detectron2.utils.visualizer import Visualizer
+from detectron2.evaluation import PascalVOCDetectionEvaluator # Our evaluator
 from detectron2.engine import DefaultPredictor
 from detectron2 import model_zoo
 
