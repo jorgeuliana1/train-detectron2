@@ -1,5 +1,6 @@
-# The source of this is script is https://gist.github.com/AlexeyGy/5e9c5a177db31569c20c76ad4dc39284 and it was authored by https://github.com/AlexeyGy, the access was made at April 27th, 2020.
-
+''' The source of this is script is https://gist.github.com/AlexeyGy/5e9c5a177db31569c20c76ad4dc39284
+and it was authored by https://github.com/AlexeyGy, the access was made at April 27th, 2020.
+'''
 import json
 import os
 from cytoolz import merge, join, groupby
@@ -53,11 +54,9 @@ def instance_to_xml(anno):
 
 
 def write_categories(coco_annotation, dst):
-    with open(os.path.abspath(coco_annotation)) as file:
-        content = json.load(file)
-        categories = tuple( d['name'] for d in content['categories'])
-        savemat(os.path.abspath(dst), {'categories': categories})
-
+    content = coco_annotation
+    categories = tuple( d['name'] for d in content['categories'] )
+    savemat(os.path.abspath(dst), {'categories': categories})
 
 def get_instances(coco_annotation):
     coco_annotation = os.path.abspath(coco_annotation)
@@ -117,7 +116,7 @@ def create_annotations(dbPath, subset, dst='annotations_voc'):
         #else:
             #print (instance['file_name'])
             
-if __name__ == '__main__':
+# if __name__ == '__main__':
     
     # write_categories(coco_annotation, dst)
     # create_imageset(annotations, dst)

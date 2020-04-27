@@ -5,6 +5,7 @@ allow us to outperform this difference.
 """
 
 import json, os
+from coco2pascal import write_categories
 from detectron2.structures import BoxMode
 
 class Dataset:
@@ -112,3 +113,65 @@ class Dataset:
             paths.append(image["file_name"]) # Getting the absolute path in every image
 
         return paths
+
+    def to_coco(self):
+
+        images_ids = {} # Keys are the image name, Values are the IDs
+        images = []
+        annotations = []
+        annotations_counter = 0 # Will be used to get the annotation ID.
+        
+        for image in self.images:
+
+            # Getting the "images" COCO section:
+            images_ids[image["file_name"]] = len(images_ids)
+            images.append({
+                "file_name" : image["file_name"],
+                "height" : image["height"],
+                "width" : image["width"],
+                "id" : images_ids[image["file_name"]]
+            })
+
+            # Getting the "annotations" COCO section:
+            for annotation in image["annotations"]:
+                
+                # COCO uses (x, y, w, h) format, we use (x, y, x, y) format
+                x0, y0, x1, y1 = annotation["bbox"]
+                w, h = x1 - x0, y1 - y0
+
+                annotations.append({
+                    "image_id" : images_ids[image["file_name"]],
+                    "id" : annotations_counter,
+                    "bbox" : [ x0, y0, w, h ],
+                    "area" : w * h,
+                    "iscrowd" : 0,
+                    "category_id" : annotation["category_id"]
+                })
+
+                annotations_counter += 1
+
+        categories = [{
+                "supercategory" : c,
+                "id" : self.categories_dict[c],
+                "name" : c
+                } for c in self.categories_dict.keys()]
+
+        # Creating a COCO format JSON:
+        coco_dataset = {
+            "images" : images,
+            "annotations" : annotations,
+            "categories" : categories
+        }
+
+        return coco_dataset
+
+
+    def to_pascal(self, destiny_folder):
+        
+        # Converts annotation from COCO to PASCAL VOC DETECTION
+
+        coco_dataset = self.to_coco()
+        
+        write_categories(coco_dataset, destiny_folder)
+        # TODO: Adapt create_imageset()
+        # TODO: Adapt create_annotations()
