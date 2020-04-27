@@ -59,6 +59,21 @@ cfg_output_path = os.path.join(output_folder_path, "cfg.yaml") # Defining the ou
 with open(cfg_output_path, "w") as f: f.write(str(cfg)) # Saving the cfg into the file.
 
 os.makedirs(os.path.join(output_folder_path, "images"), exist_ok=True) # Creating the images folder, if it doesn't exist.
+'''
+# Evaluating:
+evaluator = PascalVOCDetectionEvaluator(dataset_name)
+val_loader = build_detection_test_loader(cfg, dataset_name)
+trainer = DefaultTrainer(cfg)
+eval_results = inference_on_dataset(trainer.model, val_loader, evaluator)
+
+# Dumping the evaluation results (as JSON):
+eval_results_file_name = "evaluation_results.json"
+eval_results_file_dir = os.path.join(output_folder_path, eval_results_file_name)
+with open(eval_results_file_dir, "w") as eval_results_file:
+    json.dump(eval_results, eval_results_file, indent=2)
+
+print("Completed evaluation.")
+'''
 
 # Predicting:
 predictor = DefaultPredictor(cfg)
