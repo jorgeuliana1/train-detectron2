@@ -103,9 +103,9 @@ for image in pbar(images): # Predicting for every image (Using a progress bar).
     images_predictions.append(image_dict)
     
     # Saving the prediction image:
-    # visualizer = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.0)
-    # vis = visualizer.draw_instance_predictions(outputs["instances"].to("cpu"))
-    # cv2.imwrite(output_path, vis.get_image()[:, :, ::-1])
+    visualizer = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.0)
+    vis = visualizer.draw_instance_predictions(outputs["instances"].to("cpu"))
+    cv2.imwrite(output_path, vis.get_image()[:, :, ::-1])
 
 # Saving the dicts to a JSON file:
 json_path = os.path.join(output_folder_path, "predictions.json")
