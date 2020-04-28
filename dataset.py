@@ -172,13 +172,13 @@ class Dataset:
 
         coco_dataset = self.to_coco()
         
-        # Small test here:
-        create_annotations(coco_dataset, dst=destiny_folder)
-        quit()
+        # Setting the target folders:
+        annotations_folder = os.path.join(destiny_folder, "Annotations")
+        imageset_folder = os.path.join(destiny_folder, "ImageSets", "Main")
 
-        write_categories(coco_dataset, destiny_folder)
-        # TODO: Adapt create_imageset()
-        # TODO: Adapt create_annotations()
+        # Converting to PASCAL VOC:
+        create_annotations(coco_dataset, dst=annotations_folder)
+        # TODO: call create_imageset here, when finished.
 
 if __name__ == "__main__":
 

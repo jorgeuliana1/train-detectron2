@@ -67,18 +67,9 @@ def get_instances(coco_annotation):
     categories = {d['id'] : d['name'] for d in coco_annotation['categories']}
     return categories, tuple(keyjoin('id', coco_annotation['images'], 'image_id', coco_annotation['annotations']))
 
-    '''
-    coco_annotation = os.path.abspath(coco_annotation)
-    with open(coco_annotation) as file:
-        content = json.load(file)
-        categories = {d['id']: d['name'] for d in content['categories']}
-        return categories, tuple(keyjoin('id', content['images'], 'image_id', content['annotations']))
-    '''
-    
+        
 def rename(name, year=2014):
         out_name = os.path.splitext(name)[0]
-        # out_name = out_name.split('_')[-1]
-        # out_name = '{}_{}'.format(year, out_name)
         return out_name
 
 
@@ -137,8 +128,3 @@ def create_annotations(coco_annotation, dst='annotations_voc'):
             xml_file = etree.ElementTree(annotation)
             xml_file.write(os.path.join(dst, destination_file))
             
-# if __name__ == '__main__':
-    
-    # write_categories(coco_annotation, dst)
-    # create_imageset(annotations, dst)
-    # create_annotations(dbPath, subset, dst='annotations_voc')
