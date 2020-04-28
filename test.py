@@ -65,7 +65,7 @@ os.makedirs(os.path.join(output_folder_path, "images"), exist_ok=True) # Creatin
 my_dataset.dirname = os.path.join(output_folder_path, "PascalVOCAnnotations")
 my_dataset.split = 'test'
 my_dataset.year = 2012
-dataset.for_pascal(my_dataset.dirname)
+dataset.to_pascal(my_dataset.dirname)
 evaluator = PascalVOCDetectionEvaluator(dataset_name)
 val_loader = build_detection_test_loader(cfg, dataset_name)
 trainer = DefaultTrainer(cfg)
