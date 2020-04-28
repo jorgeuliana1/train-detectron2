@@ -60,8 +60,6 @@ with open(cfg_output_path, "w") as f: f.write(str(cfg)) # Saving the cfg into th
 
 os.makedirs(os.path.join(output_folder_path, "images"), exist_ok=True) # Creating the images folder, if it doesn't exist.
 
-dataset.to_pascal("PASCALVOCTEST")
-
 '''
 # Evaluating:
 evaluator = PascalVOCDetectionEvaluator(dataset_name)

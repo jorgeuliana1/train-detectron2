@@ -94,35 +94,10 @@ def create_imageset(annotations, dst):
     for train in annotations.listdir('*train*'):
         train_txt.write_text('{}\n'.format(os.path.splitext(train.basename())[0]), append=True)
 
-def create_annotations(coco_annotation, images_path, dst='annotations_voc'):
-    """ converts annotations from coco to voc pascal. 
-        parameters:
+def create_annotations(coco_annotation, dst='annotations_voc'):
 
-        dbPath: folder which contains the annotations subfolder which contains the annotations file in .json format. 
-                Note: the corresponding images should be in the train2014 or val2014 subfolder.
-        subset: which of the .json files should be opened e.g. train for the "instances_train2014.json" file
-        dst: destination folder for the annotations. Will be created if it doesn't exist e.g. "annotations_voc"
-     """
 
     os.makedirs(dst, exist_ok=True)
-
-    # Getting the annotations path: TODO: Delete, unuseful right now 
-    # annotations_path = os.path.join(os.path.abspath(dbPath),'annotations','instances_'+str(subset)+'2014.json')
-
-    '''
-        Annotations path : <dbPath>/annotations/instances_<subset>2014.json
-        Subset : can be "train" or "val".
-        About annotations_path: Path to JSON file containing annotations of the dataset.
-        NOTE: The annotations are in COCO format.
-    '''
-
-    # TODO: Delete, unuseful right now
-    # images_Path = os.path.join(os.path.abspath(dbPath),str(subset)+'2014')
-
-    '''
-        Images path : <dbPath>/<subset>2014
-        About images_path: Directory where the images annotated at annotations_path can be found.
-    '''
 
     categories, instances = get_instances(coco_annotation)
 
@@ -151,22 +126,17 @@ def create_annotations(coco_annotation, images_path, dst='annotations_voc'):
         img = imread(os.path.abspath(name))
         if img.ndim == 3:
             out_name = rename(name)
-            annotation = root('VOC2014', '{}.jpg'.format(out_name),  group[0]['height'], group[0]['width'])
+            image_folder, image_name = os.path.split(out_name)
+            annotation = root(image_folder, '{}.jpg'.format(image_name),  group[0]['height'], group[0]['width'])
             for instance in group:
                 annotation.append(instance_to_xml(instance))
 
             # Exporting XML to destination folder
             destination_file = "{}.xml".format(out_name)
+            _, destination_file = os.path.split(destination_file)
             xml_file = etree.ElementTree(annotation)
             xml_file.write(os.path.join(dst, destination_file))
             
-            with open(os.path.join(dst, destination_file), "r") as f:
-                print(f.read())
-
-            print(os.path.join(dst, destination_file))
-
-            etree.ElementTree(annotation).write(os.path.join(dst, destination_file))
-
 # if __name__ == '__main__':
     
     # write_categories(coco_annotation, dst)

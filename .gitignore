@@ -5,4 +5,5 @@ test_info.json
 output
 infer_output
 vis_output
+PASCALVOCTEST
 __pycache__

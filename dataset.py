@@ -173,9 +173,22 @@ class Dataset:
         coco_dataset = self.to_coco()
         
         # Small test here:
-        create_annotations(coco_dataset, "/mnt/hd1/jjmuliana/datasets/ds_31mar2020", dst="ds_test")
+        create_annotations(coco_dataset, dst=destiny_folder)
         quit()
 
         write_categories(coco_dataset, destiny_folder)
         # TODO: Adapt create_imageset()
         # TODO: Adapt create_annotations()
+
+if __name__ == "__main__":
+
+    dataset_info_path = "dataset_info.json"
+
+    # Getting test dataset data:
+    dataset_name = "t" # Arbitrary name of the dataset.
+    dataset = Dataset(dataset_info_path, "TEST")
+    images_paths = dataset.get_images_paths()
+    images = dataset.get()
+
+    dataset.to_pascal("PASCALVOCTEST")
+        
