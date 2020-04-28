@@ -5,7 +5,7 @@ allow us to outperform this difference.
 """
 
 import json, os
-from coco2pascal import write_categories
+from coco2pascal import * # For testing purposes only
 from detectron2.structures import BoxMode
 
 class Dataset:
@@ -172,6 +172,10 @@ class Dataset:
 
         coco_dataset = self.to_coco()
         
+        # Small test here:
+        create_annotations(coco_dataset, "/mnt/hd1/jjmuliana/datasets/ds_31mar2020", dst="ds_test")
+        quit()
+
         write_categories(coco_dataset, destiny_folder)
         # TODO: Adapt create_imageset()
         # TODO: Adapt create_annotations()

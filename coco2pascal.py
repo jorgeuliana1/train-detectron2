@@ -59,12 +59,22 @@ def write_categories(coco_annotation, dst):
     savemat(os.path.abspath(dst), {'categories': categories})
 
 def get_instances(coco_annotation):
+
+    '''
+        coco_annotation: Dictionary that represents the COCO annotation.
+    '''
+    
+    categories = {d['id'] : d['name'] for d in coco_annotation['categories']}
+    return categories, tuple(keyjoin('id', coco_annotation['images'], 'image_id', coco_annotation['annotations']))
+
+    '''
     coco_annotation = os.path.abspath(coco_annotation)
     with open(coco_annotation) as file:
         content = json.load(file)
         categories = {d['id']: d['name'] for d in content['categories']}
         return categories, tuple(keyjoin('id', content['images'], 'image_id', content['annotations']))
-
+    '''
+    
 def rename(name, year=2014):
         out_name = os.path.splitext(name)[0]
         # out_name = out_name.split('_')[-1]
@@ -84,7 +94,7 @@ def create_imageset(annotations, dst):
     for train in annotations.listdir('*train*'):
         train_txt.write_text('{}\n'.format(os.path.splitext(train.basename())[0]), append=True)
 
-def create_annotations(dbPath, subset, dst='annotations_voc'):
+def create_annotations(coco_annotation, images_path, dst='annotations_voc'):
     """ converts annotations from coco to voc pascal. 
         parameters:
 
@@ -93,29 +103,70 @@ def create_annotations(dbPath, subset, dst='annotations_voc'):
         subset: which of the .json files should be opened e.g. train for the "instances_train2014.json" file
         dst: destination folder for the annotations. Will be created if it doesn't exist e.g. "annotations_voc"
      """
-    if not os.path.exists(dst):
-        os.makedirs(dst)
-    annotations_path = os.path.join(os.path.abspath(dbPath),'annotations','instances_'+str(subset)+'2014.json')
-    images_Path = os.path.join(os.path.abspath(dbPath),str(subset)+'2014')
-    print("reading data...")
-    categories , instances= get_instances(annotations_path)
-    print("finished reading data")
+
+    os.makedirs(dst, exist_ok=True)
+
+    # Getting the annotations path: TODO: Delete, unuseful right now 
+    # annotations_path = os.path.join(os.path.abspath(dbPath),'annotations','instances_'+str(subset)+'2014.json')
+
+    '''
+        Annotations path : <dbPath>/annotations/instances_<subset>2014.json
+        Subset : can be "train" or "val".
+        About annotations_path: Path to JSON file containing annotations of the dataset.
+        NOTE: The annotations are in COCO format.
+    '''
+
+    # TODO: Delete, unuseful right now
+    # images_Path = os.path.join(os.path.abspath(dbPath),str(subset)+'2014')
+
+    '''
+        Images path : <dbPath>/<subset>2014
+        About images_path: Directory where the images annotated at annotations_path can be found.
+    '''
+
+    categories, instances = get_instances(coco_annotation)
+
+    '''
+        About categories: Dictionary where the keys are the categories IDs and the values are tha categories names.
+        About instances: Tuple of dictionaries containing information of the annotations and its respective images.
+        NOTE: There is one instance for every annotation, not image.
+    '''
+
     dst = os.path.abspath(dst)
+   
+    '''
+        Modifying the category ID to show an string instead of a number.
+        The string corresponds to the name of the category.
+    '''
     for i, instance in tqdm(enumerate(instances),desc="rewriting categories"):
         instances[i]['category_id'] = categories[instance['category_id']]
 
     for name, group in tqdm(iteritems(groupby('file_name', instances)), total=len(groupby('file_name', instances)), desc="processing annotations"):
-        img = imread(os.path.abspath(os.path.join(images_Path,name)))
+        
+        '''
+            About name: the image path
+            About group: the image informations
+        '''
+
+        img = imread(os.path.abspath(name))
         if img.ndim == 3:
             out_name = rename(name)
             annotation = root('VOC2014', '{}.jpg'.format(out_name),  group[0]['height'], group[0]['width'])
             for instance in group:
                 annotation.append(instance_to_xml(instance))
-            etree.ElementTree(annotation).write(os.path.join(dst, '{}.xml'.format(out_name)))
-            #print( out_name)
-        #else:
-            #print (instance['file_name'])
+
+            # Exporting XML to destination folder
+            destination_file = "{}.xml".format(out_name)
+            xml_file = etree.ElementTree(annotation)
+            xml_file.write(os.path.join(dst, destination_file))
             
+            with open(os.path.join(dst, destination_file), "r") as f:
+                print(f.read())
+
+            print(os.path.join(dst, destination_file))
+
+            etree.ElementTree(annotation).write(os.path.join(dst, destination_file))
+
 # if __name__ == '__main__':
     
     # write_categories(coco_annotation, dst)
