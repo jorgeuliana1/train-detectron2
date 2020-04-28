@@ -61,12 +61,11 @@ with open(cfg_output_path, "w") as f: f.write(str(cfg)) # Saving the cfg into th
 
 os.makedirs(os.path.join(output_folder_path, "images"), exist_ok=True) # Creating the images folder, if it doesn't exist.
 
-
 # Evaluating:
-my_dataset.dirname = "PASCALVOCTEST" # For testing purposes
+my_dataset.dirname = os.path.join(output_folder_path, "PascalVOCAnnotations")
 my_dataset.split = 'test'
 my_dataset.year = 2012
-# dataset.for_pascal(my_dataset.dirname)
+dataset.for_pascal(my_dataset.dirname)
 evaluator = PascalVOCDetectionEvaluator(dataset_name)
 val_loader = build_detection_test_loader(cfg, dataset_name)
 trainer = DefaultTrainer(cfg)

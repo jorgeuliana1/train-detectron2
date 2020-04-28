@@ -90,14 +90,20 @@ def create_imageset(annotations_folder, dataset_type, dst):
     # Verifying the dataset type:
     if dataset_type == "TRAIN":
         file_path = train_txt
+        alt_path = val_txt
     elif dataset_type == "TEST":
         file_path = val_txt
+        alt_path = train_txt
 
     # Creating the directory:
     os.makedirs(dst, exist_ok=True)
 
     with open(file_path, "w") as f:
         f.write("") # Cleaning the file
+
+    # Creating a blank alternate ImageSet file:
+    with open(alt_path, "w") as f:
+        f.write("")
 
     for instance in os.listdir(annotations):
         file_without_ext, _ = os.path.splitext(instance) # File path without extension
