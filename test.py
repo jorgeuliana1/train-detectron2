@@ -6,10 +6,10 @@ from progressbar import ProgressBar
 
 # Detectron2 modules
 from detectron2.config import get_cfg
-from detectron2.data import DatasetCatalog, MetadataCatalog
+from detectron2.data import DatasetCatalog, MetadataCatalog, build_detection_test_loader
 from detectron2.utils.visualizer import Visualizer
-from detectron2.evaluation import PascalVOCDetectionEvaluator # Our evaluator
-from detectron2.engine import DefaultPredictor
+from detectron2.evaluation import PascalVOCDetectionEvaluator, inference_on_dataset # Our evaluator
+from detectron2.engine import DefaultPredictor, DefaultTrainer
 from detectron2 import model_zoo
 
 # Our modules:
@@ -45,7 +45,8 @@ with open(test_info_path, "r") as f:
 # Setting up cfg:
 cfg = get_cfg()
 cfg.merge_from_file(test_info["CFG_PATH"])
-cfg.DATASETS.TEST = (dataset_name)
+cfg.DATASETS.TRAIN = (dataset_name, )
+cfg.DATASETS.TEST = (dataset_name, )
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = test_info["SCORE_THRESH_TEST"]
 cfg.MODEL.WEIGHTS = test_info["WEIGHTS_PATH"]
 
@@ -60,8 +61,12 @@ with open(cfg_output_path, "w") as f: f.write(str(cfg)) # Saving the cfg into th
 
 os.makedirs(os.path.join(output_folder_path, "images"), exist_ok=True) # Creating the images folder, if it doesn't exist.
 
-'''
+
 # Evaluating:
+my_dataset.dirname = "PASCALVOCTEST" # For testing purposes
+my_dataset.split = 'test'
+my_dataset.year = 2012
+# dataset.for_pascal(my_dataset.dirname)
 evaluator = PascalVOCDetectionEvaluator(dataset_name)
 val_loader = build_detection_test_loader(cfg, dataset_name)
 trainer = DefaultTrainer(cfg)
@@ -74,7 +79,6 @@ with open(eval_results_file_dir, "w") as eval_results_file:
     json.dump(eval_results, eval_results_file, indent=2)
 
 print("Completed evaluation.")
-'''
 
 # Predicting:
 predictor = DefaultPredictor(cfg)
