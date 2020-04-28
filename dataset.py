@@ -5,7 +5,7 @@ allow us to outperform this difference.
 """
 
 import json, os
-from coco2pascal import * # For testing purposes only
+from coco2pascal import create_annotations, create_imageset
 from detectron2.structures import BoxMode
 
 class Dataset:
@@ -96,6 +96,9 @@ class Dataset:
         self._set_categories_id()
         self._set_coco_dicts()
 
+        # Setting object variables:
+        self.dataset_type = dataset_type
+
     def get(self):
 
         # Returns the already formated data
@@ -178,17 +181,4 @@ class Dataset:
 
         # Converting to PASCAL VOC:
         create_annotations(coco_dataset, dst=annotations_folder)
-        # TODO: call create_imageset here, when finished.
-
-if __name__ == "__main__":
-
-    dataset_info_path = "dataset_info.json"
-
-    # Getting test dataset data:
-    dataset_name = "t" # Arbitrary name of the dataset.
-    dataset = Dataset(dataset_info_path, "TEST")
-    images_paths = dataset.get_images_paths()
-    images = dataset.get()
-
-    dataset.to_pascal("PASCALVOCTEST")
-        
+        create_imageset(annotations_folder, self.dataset_type, imageset_folder)

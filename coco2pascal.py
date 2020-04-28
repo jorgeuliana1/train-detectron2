@@ -73,17 +73,36 @@ def rename(name, year=2014):
         return out_name
 
 
-def create_imageset(annotations, dst):
-    annotations = os.path.abspath(annotations)
+def create_imageset(annotations_folder, dataset_type, dst):
+
+    '''
+        about annotations_folder: folder where you can find the annotations of the dataset (VOC format)
+        about dataset_type: "TRAIN" or "TEST"
+        about dst: destination folder
+    '''
+
+    # Setting the paths:
+    annotations = os.path.abspath(annotations_folder)
     dst = os.path.abspath(dst)
     val_txt = os.path.join(dst,'val.txt')
     train_txt = os.path.join(dst, 'train.txt')
 
-    for val in annotations.listdir('*val*'):
-        val_txt.write_text('{}\n'.format(os.path.splitext(val.basename())[0]), append=True)
+    # Verifying the dataset type:
+    if dataset_type == "TRAIN":
+        file_path = train_txt
+    elif dataset_type == "TEST":
+        file_path = val_txt
 
-    for train in annotations.listdir('*train*'):
-        train_txt.write_text('{}\n'.format(os.path.splitext(train.basename())[0]), append=True)
+    # Creating the directory:
+    os.makedirs(dst, exist_ok=True)
+
+    with open(file_path, "w") as f:
+        f.write("") # Cleaning the file
+
+    for instance in os.listdir(annotations):
+        file_without_ext, _ = os.path.splitext(instance) # File path without extension
+        with open(file_path, "a") as f:
+            f.write('{}\n'.format(file_without_ext))
 
 def create_annotations(coco_annotation, dst='annotations_voc'):
 
