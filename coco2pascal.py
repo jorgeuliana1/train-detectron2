@@ -45,7 +45,7 @@ def instance_to_xml(anno):
     return E.object(
             E.name(anno['category_id']),
             E.pose("Frontal"),
-            E.trucated(0),
+            E.truncated(0),
             E.difficult(0),
             E.bndbox(
                 E.xmin(xmin),
