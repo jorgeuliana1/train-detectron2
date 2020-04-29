@@ -44,6 +44,9 @@ def instance_to_xml(anno):
     xmin, ymin, width, height = anno['bbox']
     return E.object(
             E.name(anno['category_id']),
+            E.pose("Frontal"),
+            E.trucated(0),
+            E.difficult(0),
             E.bndbox(
                 E.xmin(xmin),
                 E.ymin(ymin),
@@ -84,7 +87,7 @@ def create_imageset(annotations_folder, dataset_type, dst):
     # Setting the paths:
     annotations = os.path.abspath(annotations_folder)
     dst = os.path.abspath(dst)
-    val_txt = os.path.join(dst,'val.txt')
+    val_txt = os.path.join(dst,'test.txt')
     train_txt = os.path.join(dst, 'train.txt')
 
     # Verifying the dataset type:
