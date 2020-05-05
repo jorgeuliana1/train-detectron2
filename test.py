@@ -152,7 +152,7 @@ pascal_results = pascal_evaluator.evaluate()
 
 # Dumping the PASCAL VOC evaluation results:
 pascal_results_file_path = os.path.join(output_folder_path, "pascal_eval_results.json")
-with open(pascal_results_file_path, "w") as coco_results_file:
+with open(pascal_results_file_path, "w") as pascal_results_file:
             json.dump(pascal_results, pascal_results_file, indent=2)
 
 print("PASCAL VOC EVALUATION FINISHED")
