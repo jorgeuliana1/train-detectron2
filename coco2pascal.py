@@ -70,7 +70,6 @@ def get_instances(coco_annotation):
     categories = {d['id'] : d['name'] for d in coco_annotation['categories']}
     return categories, tuple(keyjoin('id', coco_annotation['images'], 'image_id', coco_annotation['annotations']))
 
-        
 def rename(name, year=2014):
         out_name = os.path.splitext(name)[0]
         return out_name

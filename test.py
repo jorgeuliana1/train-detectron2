@@ -6,10 +6,10 @@ from progressbar import ProgressBar
 
 # Detectron2 modules
 from detectron2.config import get_cfg
-from detectron2.data import DatasetCatalog, MetadataCatalog, build_detection_test_loader
+from detectron2.data import DatasetCatalog, MetadataCatalog
 from detectron2.utils.visualizer import Visualizer
-from detectron2.evaluation import PascalVOCDetectionEvaluator, inference_on_dataset # Our evaluator
-from detectron2.engine import DefaultPredictor, DefaultTrainer
+from detectron2.evaluation import PascalVOCDetectionEvaluator, COCOEvaluator # Our evaluator
+from detectron2.engine import DefaultPredictor
 from detectron2 import model_zoo
 
 # Our modules:
@@ -61,32 +61,16 @@ with open(cfg_output_path, "w") as f: f.write(str(cfg)) # Saving the cfg into th
 
 os.makedirs(os.path.join(output_folder_path, "images"), exist_ok=True) # Creating the images folder, if it doesn't exist.
 
-# Evaluating:
-my_dataset.dirname = os.path.join(output_folder_path, "PascalVOCAnnotations")
-my_dataset.split = 'test'
-my_dataset.year = 2012
-dataset.to_pascal(my_dataset.dirname)
-evaluator = PascalVOCDetectionEvaluator(dataset_name)
-val_loader = build_detection_test_loader(cfg, dataset_name)
-trainer = DefaultTrainer(cfg)
-eval_results = inference_on_dataset(trainer.model, val_loader, evaluator)
-
-# Dumping the evaluation results (as JSON):
-eval_results_file_name = "evaluation_results.json"
-eval_results_file_dir = os.path.join(output_folder_path, eval_results_file_name)
-with open(eval_results_file_dir, "w") as eval_results_file:
-    json.dump(eval_results, eval_results_file, indent=2)
-
-print("Completed evaluation.")
-
 # Predicting:
 predictor = DefaultPredictor(cfg)
 images_predictions = [] # This list will be used to create a JSON file at the end of the predictions.
+outputs_list = [] # This list will contain a list of predictions outputs.
 pbar = ProgressBar()
 for image in pbar(images): # Predicting for every image (Using a progress bar).
     image_path = image["file_name"]
     img = cv2.imread(image_path) # Loading the image with opencv.
     outputs = predictor(img) # Predicting image annotations.
+    outputs_list.append(outputs)
 
     # Getting prediction image path
     image_file_name = image_path.split("/")[-1] # We are interested at the last element of the path.
@@ -121,12 +105,54 @@ for image in pbar(images): # Predicting for every image (Using a progress bar).
             }
     images_predictions.append(image_dict)
     
+    """
     # Saving the prediction image:
     visualizer = Visualizer(img[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.0)
     vis = visualizer.draw_instance_predictions(outputs["instances"].to("cpu"))
     cv2.imwrite(output_path, vis.get_image()[:, :, ::-1])
+    """
 
 # Saving the dicts to a JSON file:
 json_path = os.path.join(output_folder_path, "predictions.json")
 with open(json_path, "w") as json_file:
     json.dump(images_predictions, json_file, indent=2)
+
+# Fixing the image for PASCAL evaluation:
+for image in images:
+    image["image_id"] = os.path.splitext(os.path.split(image["image_id"])[-1])[0]
+
+# Evaluating the prediction:
+
+# Setting up the COCO evaluation:
+coco_evaluator = COCOEvaluator(dataset_name, cfg, distributed=True, output_dir=output_folder_path)
+
+# Setting up the PASCAL VOC evaluation:
+my_dataset.dirname = os.path.join(output_folder_path, "PascalVOCAnnotations")
+my_dataset.split = 'test'
+my_dataset.year = 2012
+dataset.to_pascal(my_dataset.dirname) # Converting the dataset to PASCAL VOC
+pascal_evaluator = PascalVOCDetectionEvaluator(dataset_name)
+
+# COCO evaluating:
+coco_evaluator.reset()
+coco_evaluator.process(images, outputs_list)
+coco_results = coco_evaluator.evaluate()
+
+# Dumping the COCO evaluation results:
+coco_results_file_path = os.path.join(output_folder_path, "coco_eval_results.json")
+with open(coco_results_file_path, "w") as coco_results_file:
+        json.dump(coco_results, coco_results_file, indent=2)
+
+print("COCO EVALUATION FINISHED")
+
+# PASCAL VOC evaluating:
+pascal_evaluator.reset()
+pascal_evaluator.process(images, outputs_list)
+pascal_results = pascal_evaluator.evaluate()
+
+# Dumping the PASCAL VOC evaluation results:
+pascal_results_file_path = os.path.join(output_folder_path, "pascal_eval_results.json")
+with open(pascal_results_file_path, "w") as coco_results_file:
+            json.dump(pascal_results, pascal_results_file, indent=2)
+
+print("PASCAL VOC EVALUATION FINISHED")
