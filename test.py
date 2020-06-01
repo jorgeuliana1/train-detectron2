@@ -73,7 +73,7 @@ for image in pbar(images): # Predicting for every image (Using a progress bar).
     outputs_list.append(outputs)
 
     # Getting prediction image path
-    image_file_name = image_path.split("/")[-1] # We are interested at the last element of the path.
+    image_file_name = image_path # No more split
     output_path = os.path.join(output_folder_path, "images", image_file_name)
 
     # Getting the prediction info:
